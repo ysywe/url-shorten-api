@@ -5,9 +5,11 @@ from sqlalchemy.sql import func
 from datetime import datetime
 
 class URLModel(Base):
+    __tablename__ = "urls"
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     url: Mapped[str] = mapped_column(String, nullable=False)
-    short_code: Mapped[str] = mapped_column(String, nullable=False)
+    short_code: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    access_count: Mapped[int] = mapped_column(Integer, default=0)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    access_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
