@@ -18,8 +18,11 @@ class URLResponse(URLBase):
     created_at: datetime = Field(serialization_alias="createdAt")
     updated_at: datetime = Field(serialization_alias="updatedAt")
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(str_strip_whitespace=True, from_attributes=True)
 
     @field_validator("id", mode="before")
     def convert_int_id_to_str(cls, value):
         return str(value)
+    
+class URLDetailsResponse(URLResponse):
+    access_count: int = Field(default=0, serialization_alias="accessCount")
