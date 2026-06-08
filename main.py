@@ -4,6 +4,7 @@ import secrets
 from typing import Annotated
 from fastapi import FastAPI, HTTPException, status, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 from database import SessionLocal, Base, engine
 
 Base.metadata.create_all(bind=engine)
@@ -30,3 +31,13 @@ async def create_Post(payload: schemas.URLCreate, db: DBSession) -> schemas.URLR
     db.refresh(new_url)
 
     return new_url
+
+@app.get("/shorten/{short_code}", status_code=status.HTTP_200_OK)
+async def get_url(short_code: str, db: DBSession) -> schemas.URLResponse:
+    url = db.scalar(select(models.URLModel).where(models.URLModel.short_code == short_code))
+
+    if not url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"URL with {short_code} not found")
+    
+    return url
+
