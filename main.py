@@ -2,7 +2,7 @@ import schemas
 import models
 import secrets
 from typing import Annotated
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI, HTTPException, status, Depends, Response
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from database import SessionLocal, Base, engine
@@ -41,3 +41,28 @@ async def get_url(short_code: str, db: DBSession) -> schemas.URLResponse:
     
     return url
 
+@app.put("/shorten/{short_code}", status_code=status.HTTP_200_OK)
+async def update_url(short_code: str, payload: schemas.URLUpdate, db: DBSession) -> schemas.URLResponse:
+    url = db.scalar(select(models.URLModel).where(models.URLModel.short_code == short_code))
+
+    if not url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"URL with {short_code} not found")
+
+    url.url = payload.url
+
+    db.commit()
+    db.refresh(url)
+
+    return url
+
+@app.delete("/shorten/{short_code}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_url(short_code: str, db: DBSession):
+    url = db.scalar(select(models.URLModel).where(models.URLModel.short_code == short_code))
+
+    if not url:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"URL with {short_code} not found")
+    
+    db.delete(url)
+    db.commit()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
