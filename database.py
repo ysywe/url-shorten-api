@@ -1,22 +1,31 @@
-import os
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
-
-load_dotenv()
-
-DATABASE_USER = os.getenv("DATABASE_USER")
-DATABASE_PASS = os.getenv("DATABASE_PASS")
-
-SQLALCHEMY_DATABASE_URL =f"postgresql://{DATABASE_USER}:{DATABASE_PASS}@localhost:5432/url_db"
+from config import settings
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    pool_size=10,
-    max_overflow=20
+    settings.DATABASE_URL,
+    pool_pre_ping=True,
+    echo=True,
+    pool_size=20,
+    max_overflow=10
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    engine,  
+    expire_on_commit=False,
+    autocommit=False,
+    autoflush=False
+)
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def create_tables():
+    Base.metadata.create_all(bind=engine)
 
 class Base(DeclarativeBase):
     pass
