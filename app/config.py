@@ -1,14 +1,13 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, computed_field
+from pydantic import Field
 
 class Settings(BaseSettings):
     DB_USER: str = Field(default="postgres")
     DB_PASS: str 
-    DB_HOST: str = Field(default="localhost")
+    DB_HOST: str = Field(default="db")
     DB_PORT: int = Field(default=5432)
-    DB_NAME: str 
+    DB_NAME: str = Field(default="url_db")
 
-    @computed_field
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
