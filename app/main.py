@@ -13,7 +13,7 @@ from app.schemas import (
     URLResponse, 
     URLDetailsResponse
 )
-from app.repositories.url_repo import (
+from app.url_repo import (
     get_url_from_db, 
     save_url_to_db, 
     update_url_from_db,
